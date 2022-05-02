@@ -4,7 +4,6 @@ use serde_json;
 use serde::{Deserialize};
 use std::io::{BufReader};
 use std::env;
-use std::default::Default;
 
 #[derive(Debug, Deserialize)]
 struct LicenseExtended {
@@ -23,14 +22,6 @@ struct Package {
     version: Option<String>
 }
 
-#[derive(Deserialize, Debug)]
-struct MyType(Vec<i32>);
-impl Default for MyType {
-    fn default() -> Self {
-        Self(vec![1, 2, 3])
-    }
-}
-
 fn current_exe() -> Option<String> {
     env::current_exe()
         .ok()?
@@ -47,7 +38,7 @@ fn main() {
     if args.len() > 1 {
         let arg = &args[1];
         match arg.as_str() {
-            "--help" => println!("Usage: {} [dir]", current_exe().unwrap()),
+            "--help" | "-h" => println!("Usage: {} [dir]", current_exe().unwrap()),
             _ => {dir = arg}
         }
     }
