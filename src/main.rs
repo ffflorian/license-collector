@@ -39,7 +39,7 @@ fn main() {
         let arg = &args[1];
         match arg.as_str() {
             "--help" | "-h" => println!("Usage: {} [dir]", current_exe().unwrap()),
-            _ => {dir = arg}
+            _ => dir = arg
         }
     }
 
@@ -59,11 +59,11 @@ fn main() {
         match json.version {
             Some(_) => {
                 match json.license {
-                    Some(license) => {println!("{}: {:?}", filename, license)},
-                    _ => {println!("{}: none", filename)}
+                    Some(license) => println!("{}: {:?}", filename, license),
+                    _ => println!("{}: none", filename)
                 }
             }
-            _ => {}
+            _ => continue
         }
     }
 }
