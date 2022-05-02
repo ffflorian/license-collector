@@ -5,6 +5,7 @@ use serde::{Deserialize};
 use std::io::{BufReader};
 use std::env;
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 enum License {
     String(String),
@@ -20,6 +21,7 @@ struct Package {
     version: Option<String>
 }
 
+// https://stackoverflow.com/a/58113997
 fn current_exe() -> Option<String> {
     env::current_exe()
         .ok()?
@@ -31,22 +33,20 @@ fn current_exe() -> Option<String> {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let mut dir = "./node_modules/";
+    let mut search_dir = "./node_modules/";
 
     if args.len() > 1 {
         let arg = &args[1];
         match arg.as_str() {
             "--help" | "-h" => println!("Usage: {} [dir]", current_exe().unwrap()),
-            _ => dir = arg
+            _ => search_dir = arg
         }
     }
 
-    for entry in glob(&format!("{}/**/package.json", dir)).expect("Failed to read glob pattern") {
-        let filename = entry.unwrap().display().to_string();
+    for package_json_path in glob(&format!("{}/**/package.json", search_dir)).expect("Failed to read glob pattern") {
+        let filename = package_json_path.unwrap().display().to_string();
 
-        let metadata = fs::symlink_metadata(filename.clone()).unwrap();
-
-        if metadata.is_symlink() {
+        if fs::symlink_metadata(filename.clone()).unwrap().is_symlink() {
             continue;
         }
 
@@ -54,6 +54,7 @@ fn main() {
         let reader = BufReader::new(file);
 
         let package: Package = serde_json::from_reader(reader).unwrap();
+
         if package.version.is_some() {
             match package.license {
                 Some(license) => println!("{}: {:?}", filename, license),
