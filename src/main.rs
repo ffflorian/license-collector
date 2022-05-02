@@ -20,7 +20,7 @@ enum License {
 #[derive(Debug, PartialEq, Deserialize)]
 struct Package {
     license: Option<String>,
-    name: Option<String>
+    version: Option<String>
 }
 
 #[derive(Deserialize, Debug)]
@@ -65,7 +65,7 @@ fn main() {
         let reader = BufReader::new(file);
 
         let json: Package = serde_json::from_reader(reader).unwrap();
-        match json.name {
+        match json.version {
             Some(_) => {
                 match json.license {
                     Some(license) => {println!("{}: {:?}", filename, license)},
