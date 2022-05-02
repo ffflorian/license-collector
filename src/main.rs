@@ -54,14 +54,11 @@ fn main() {
         let reader = BufReader::new(file);
 
         let package: Package = serde_json::from_reader(reader).unwrap();
-        match package.version {
-            Some(_) => {
-                match package.license {
-                    Some(license) => println!("{}: {:?}", filename, license),
-                    _ => println!("{}: none", filename)
-                }
+        if package.version.is_some() {
+            match package.license {
+                Some(license) => println!("{}: {:?}", filename, license),
+                _ => println!("{}: none", filename)
             }
-            _ => continue
         }
     }
 }
