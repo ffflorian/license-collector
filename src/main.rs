@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{self, File};
 use glob::glob;
 use serde_json;
 use serde::{Deserialize};
@@ -17,9 +17,10 @@ enum License {
     LicenseExtended,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, PartialEq, Deserialize)]
 struct Package {
-    license: Option<License>,
+    license: Option<String>,
+    name: Option<String>
 }
 
 #[derive(Deserialize, Debug)]
@@ -53,14 +54,25 @@ fn main() {
 
     for entry in glob(&format!("{}/**/package.json", dir)).expect("Failed to read glob pattern") {
         let filename = entry.unwrap().display().to_string();
+
+        let metadata = fs::symlink_metadata(filename.clone()).unwrap();
+
+        if metadata.is_symlink() {
+            continue;
+        }
+
         let file = File::open(filename.clone()).unwrap();
         let reader = BufReader::new(file);
 
         let json: Package = serde_json::from_reader(reader).unwrap();
-        if let Some(license) = json.license {
-            println!("{}: {:?}", filename, license);
-        } else {
-            println!("{}: none", filename);
+        match json.name {
+            Some(_) => {
+                match json.license {
+                    Some(license) => {println!("{}: {:?}", filename, license)},
+                    _ => {println!("{}: none", filename)}
+                }
+            }
+            _ => {}
         }
     }
 }
