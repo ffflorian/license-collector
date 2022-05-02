@@ -6,19 +6,17 @@ use std::io::{BufReader};
 use std::env;
 
 #[derive(Debug, Deserialize)]
-struct LicenseExtended {
-    r#type: String,
+enum License {
+    String(String),
+    Nested {
+        r#type: Option<String>,
+        url: Option<String>
+    }
 }
 
 #[derive(Debug, Deserialize)]
-enum License {
-    String,
-    LicenseExtended,
-}
-
-#[derive(Debug, PartialEq, Deserialize)]
 struct Package {
-    license: Option<String>,
+    license: Option<License>,
     version: Option<String>
 }
 
@@ -55,10 +53,10 @@ fn main() {
         let file = File::open(filename.clone()).unwrap();
         let reader = BufReader::new(file);
 
-        let json: Package = serde_json::from_reader(reader).unwrap();
-        match json.version {
+        let package: Package = serde_json::from_reader(reader).unwrap();
+        match package.version {
             Some(_) => {
-                match json.license {
+                match package.license {
                     Some(license) => println!("{}: {:?}", filename, license),
                     _ => println!("{}: none", filename)
                 }
